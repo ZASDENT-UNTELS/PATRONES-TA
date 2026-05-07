@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registrar Nuevo Tratamiento</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="card shadow-lg mx-auto" style="max-width: 800px;">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Registrar Nuevo Tratamiento</h4>
+            </div>
+            <div class="card-body">
+                <form id="form-registro-tratamiento" class="needs-validation" novalidate>
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del tratamiento</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        <div class="invalid-feedback">Este campo es obligatorio</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_especialidad" class="form-label">Especialidad</label>
+                        <select class="form-select" id="id_especialidad" name="id_especialidad" required>
+                            <option value="">Cargando especialidades...</option>
+                        </select>
+                        <div class="invalid-feedback">Seleccione una especialidad</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+                        <div class="invalid-feedback">Este campo es obligatorio</div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+    <label for="duracion" class="form-label">Duración (minutos)</label>
+    <input type="number" class="form-control" id="duracion" name="duracion_estimada" min="15" max="600" step="5" required>
+    <div class="invalid-feedback">Duración mínima: 15 minutos, máxima: 10 horas.</div>
+</div>
+                        
+                        <div class="col-md-6">
+                            <label for="costo" class="form-label">Costo (S/)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">S/</span>
+                                <input type="number" class="form-control" id="costo" name="costo" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="requisitos" class="form-label">Requisitos</label>
+                        <textarea class="form-control" id="requisitos" name="requisitos" rows="2"></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="../tratamientos.html" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Registrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="trataminto_registro.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+# ============================================================
+# .gitignore — Archivos que Git debe ignorar
+# ============================================================
+
+# Variables de entorno (contienen contraseñas)
+.env
+
+# Dependencias de PHP (se regeneran con "composer install")
+vendor/
+
+# Dependencias de Node/Angular (se regeneran con "npm install")
+node_modules/
+
+# Backups generados por el script de migración
+*.bak
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.user
