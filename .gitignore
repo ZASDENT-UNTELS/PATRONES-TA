@@ -1,25 +1,33 @@
 # ============================================================
-# .gitignore — Archivos que Git debe ignorar
+# .gitignore — Archivos que Git debe ignorar para PHP
 # ============================================================
 
-# Variables de entorno (contienen contraseñas)
+# 1. Variables de Entorno (¡NUNCA SUBIR CONTRASEÑAS A GITHUB!)
 .env
+.env.local
+.env.*.local
 
-# Dependencias de PHP (se regeneran con "composer install")
-vendor/
+# 2. Dependencias de Composer
+/vendor/
 
-# Dependencias de Node/Angular (se regeneran con "npm install")
-node_modules/
-
-# Backups generados por el script de migración
+# 3. Backups de Base de Datos y Logs
+*.sql
+*.sqlite
+*.log
 *.bak
+database_backups/
 
-# Archivos del sistema operativo
+# 4. Archivos de Sistema Operativo
 .DS_Store
 Thumbs.db
+desktop.ini
 
-# IDEs
+# 5. Configuraciones de Editores/IDEs
 .vscode/
 .idea/
 *.suo
 *.user
+
+# 6. Caché y temporales
+/tmp/
+/cache/

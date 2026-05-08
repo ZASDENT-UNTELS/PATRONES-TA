@@ -72,10 +72,10 @@ if (!empty($raw)) {
 
 try {
     // Requerir dependencias dentro del try para capturar excepciones (ej. fallo de DB)
-    require_once ROOT_PATH . '/php/database/conexion.php';
-    require_once ROOT_PATH . '/php/service/AuthService.php';
-    require_once ROOT_PATH . '/php/service/CitaService.php';
-    require_once ROOT_PATH . '/php/service/PagoService.php';
+    require_once ROOT_PATH . '/src/database/conexion.php';
+    require_once ROOT_PATH . '/src/service/AuthService.php';
+    require_once ROOT_PATH . '/src/service/CitaService.php';
+    require_once ROOT_PATH . '/src/service/PagoService.php';
 
     // ── Rutas públicas (sin autenticación) ────────────────────────────────
 
@@ -93,12 +93,52 @@ try {
         respond(200, ['success' => true, 'message' => 'Sesión cerrada.']);
     }
 
+    if ($method === 'GET' && $path === '/api/auth/me') {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (isset($_SESSION['id_usuario'])) {
+            respond(200, [
+                'id_usuario' => $_SESSION['id_usuario'],
+                'nombre' => $_SESSION['nombre'],
+                'rol' => $_SESSION['rol'],
+                'id_rol' => $_SESSION['id_rol'],
+                'username' => $_SESSION['username']
+            ]);
+        } else {
+            respond(401, ['error' => 'No autenticado.']);
+        }
+    }
+
     // ── Middleware de autenticación ────────────────────────────────────────
     // Todas las rutas debajo de aquí requieren sesión activa
 
     $auth = new AuthService();
     if (!$auth->estaAutenticado()) {
         respond(401, ['error' => 'No autenticado.']);
+    }
+
+    // ── Ruta Dashboard ────────────────────────────────────────────────────
+
+    if ($method === 'GET' && $path === '/api/dashboard') {
+        require_once ROOT_PATH . '/src/dao/CitaDAO.php';
+        require_once ROOT_PATH . '/src/dao/PacienteDAO.php';
+        require_once ROOT_PATH . '/src/dao/DentistaDAO.php';
+        require_once ROOT_PATH . '/src/dao/PagoDAO.php';
+
+        $citaDAO = new CitaDAO();
+        $pacienteDAO = new PacienteDAO();
+        $dentistaDAO = new DentistaDAO();
+        $pagoDAO = new PagoDAO();
+
+        $stats = [
+            'citasHoy' => $citaDAO->contarPorFecha(date('Y-m-d')),
+            'totalPacientes' => $pacienteDAO->contar(),
+            'totalDentistas' => $dentistaDAO->contar(),
+            'ingresosEsteMes' => $pagoDAO->totalPorMes(date('Y-m')),
+        ];
+
+        respond(200, $stats);
     }
 
     // ── Rutas de Citas ────────────────────────────────────────────────────
@@ -141,6 +181,7 @@ try {
         $service = new PagoService();
 
         match ($method) {
+            'GET'  => respond(200, (new PagoDAO())->findAll()),
             'POST' => respond(201, $service->registrar($body)),
             default => respond(405, ['error' => 'Método no permitido.']),
         };
@@ -164,7 +205,7 @@ try {
 
     if ($path === '/api/paciente/perfil') {
         $auth->verificarRol([AuthService::ROL_PACIENTE]);
-        require_once ROOT_PATH . '/php/service/PacienteService.php';
+        require_once ROOT_PATH . '/src/service/PacienteService.php';
         $service = new PacienteService();
         $idUsuario = $_SESSION['id_usuario'];
 
@@ -177,7 +218,7 @@ try {
 
     if ($path === '/api/paciente/citas') {
         $auth->verificarRol([AuthService::ROL_PACIENTE]);
-        require_once ROOT_PATH . '/php/service/PacienteService.php';
+        require_once ROOT_PATH . '/src/service/PacienteService.php';
         $idUsuario = $_SESSION['id_usuario'];
         $idPaciente = (new PacienteService())->obtenerIdPaciente($idUsuario);
 
@@ -193,7 +234,7 @@ try {
 
     if ($path === '/api/paciente/historial') {
         $auth->verificarRol([AuthService::ROL_PACIENTE]);
-        require_once ROOT_PATH . '/php/service/PacienteService.php';
+        require_once ROOT_PATH . '/src/service/PacienteService.php';
         $idUsuario = $_SESSION['id_usuario'];
 
         match ($method) {
@@ -204,7 +245,7 @@ try {
 
     if ($path === '/api/paciente/pagos') {
         $auth->verificarRol([AuthService::ROL_PACIENTE]);
-        require_once ROOT_PATH . '/php/service/PacienteService.php';
+        require_once ROOT_PATH . '/src/service/PacienteService.php';
         $idUsuario = $_SESSION['id_usuario'];
         $idPaciente = (new PacienteService())->obtenerIdPaciente($idUsuario);
 
@@ -216,6 +257,28 @@ try {
             'GET'  => respond(200, (new PagoService())->listarPorPaciente($idPaciente)),
             default => respond(405, ['error' => 'Método no permitido.']),
         };
+    }
+
+    // ── Nuevas Rutas Funcionales (Usuarios, Dentistas, Pacientes) ─────────
+
+    if ($path === '/api/usuarios') {
+        $auth->verificarRol([AuthService::ROL_ADMIN]);
+        require_once ROOT_PATH . '/src/dao/UsuarioDAO.php';
+        respond(200, (new UsuarioDAO())->findAll());
+    }
+
+    if ($path === '/api/dentistas') {
+        $auth->verificarRol([AuthService::ROL_ADMIN, AuthService::ROL_RECEPCION]);
+        require_once ROOT_PATH . '/src/dao/DentistaDAO.php';
+        respond(200, (new DentistaDAO())->findAll());
+    }
+
+    if ($path === '/api/pacientes') {
+        $auth->verificarRol([AuthService::ROL_ADMIN, AuthService::ROL_RECEPCION]);
+        require_once ROOT_PATH . '/src/dao/PacienteDAO.php';
+        // PacienteDAO->findAll devuelve un array con 'data' y 'total'
+        $pacientes = (new PacienteDAO())->findAll(1000); 
+        respond(200, $pacientes['data']);
     }
 
     // ── 404 — ruta no encontrada ──────────────────────────────────────────
