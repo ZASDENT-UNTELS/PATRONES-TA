@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../dao/UsuarioDAO.php';
+require_once __DIR__ . '/../../models/UsuarioDAO.php';
 
 /**
  * AuthService — Service Layer para autenticación

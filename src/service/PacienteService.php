@@ -1,7 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../dao/PacienteDAO.php';
-require_once __DIR__ . '/../dao/UsuarioDAO.php';
+require_once __DIR__ . '/../../models/UsuarioDAO.php';
 require_once __DIR__ . '/../dao/HistorialMedicoDAO.php';
 require_once __DIR__ . '/../dto/PacienteDTO.php';
 require_once __DIR__ . '/../database/conexion.php';

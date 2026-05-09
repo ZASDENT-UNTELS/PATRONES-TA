@@ -263,7 +263,7 @@ try {
 
     if ($path === '/api/usuarios') {
         $auth->verificarRol([AuthService::ROL_ADMIN]);
-        require_once ROOT_PATH . '/src/dao/UsuarioDAO.php';
+        require_once ROOT_PATH . '/models/UsuarioDAO.php';
         respond(200, (new UsuarioDAO())->findAll());
     }
 

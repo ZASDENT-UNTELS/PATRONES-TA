@@ -1,7 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../dao/DAOInterface.php';
-require_once __DIR__ . '/../database/conexion.php';
+require_once __DIR__ . '/../src/dao/DAOInterface.php';
+require_once __DIR__ . '/../src/database/conexion.php';
 
 /**
  * UsuarioDAO — Data Access Object para la tabla usuarios
@@ -34,6 +34,33 @@ class UsuarioDAO implements DAOInterface
     {
         $stmt = $this->conn->query('SELECT * FROM usuarios ORDER BY nombre_apellido ASC');
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function registrar(array $data): int
+    {
+        $stmt = $this->conn->prepare('INSERT INTO usuarios (nombre_apellido, usuario_usuario, usuario_clave, email, telefono, direccion, id_rol, activo, ultimo_login)
+                                       VALUES (:nombre_apellido, :usuario_usuario, :usuario_clave, :email, :telefono, :direccion, :id_rol, :activo, NOW())');
+        $stmt->execute([
+            ':nombre_apellido' => $data['nombre_apellido'] ?? null,
+            ':usuario_usuario' => $data['usuario_usuario'] ?? null,
+            ':usuario_clave' => $data['usuario_clave'] ?? null,
+            ':email' => $data['email'] ?? null,
+            ':telefono' => $data['telefono'] ?? null,
+            ':direccion' => $data['direccion'] ?? null,
+            ':id_rol' => $data['id_rol'] ?? 2,
+            ':activo' => $data['activo'] ?? 1,
+        ]);
+        return (int) $this->conn->lastInsertId();
+    }
+
+    public function listar(): array
+    {
+        return $this->findAll();
+    }
+
+    public function buscarPorId(int $id): ?array
+    {
+        return $this->findById($id);
     }
 
     public function save(mixed $dto): int
