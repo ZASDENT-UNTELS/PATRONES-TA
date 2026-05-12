@@ -88,6 +88,27 @@ class CitaDAO implements DAOInterface
     }
 
     /**
+     * Devolver todas las citas como arrays crudos (con datos de joins para el panel admin).
+     */
+    public function findAllRaw(): array
+    {
+        $stmt = $this->conn->query('
+            SELECT c.id_cita, c.fecha_hora, c.duracion, c.estado, c.notas,
+                   u.nombre_apellido  AS nombre_paciente,
+                   t.nombre           AS nombre_tratamiento,
+                   ud.nombre_apellido AS nombre_dentista
+            FROM citas c
+            JOIN pacientes p    ON c.id_paciente   = p.id_paciente
+            JOIN usuarios u     ON p.id_usuario     = u.id_usuario
+            JOIN tratamientos t ON c.id_tratamiento = t.id_tratamiento
+            LEFT JOIN dentistas d  ON c.id_dentista = d.id_dentista
+            LEFT JOIN usuarios ud  ON d.id_usuario  = ud.id_usuario
+            ORDER BY c.fecha_hora DESC
+        ');
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Insertar una nueva cita. Devuelve el ID generado.
      */
     public function save(mixed $dto): int

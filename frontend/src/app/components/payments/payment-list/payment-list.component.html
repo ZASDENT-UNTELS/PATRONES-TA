@@ -1,0 +1,98 @@
+<div class="payment-list-container">
+  <div class="header-actions">
+    <div class="title-group">
+      <h1 class="medical-title">Gestión de Pagos</h1>
+      <p class="text-muted">Administra los pagos del consultorio</p>
+    </div>
+  </div>
+
+  <div class="medical-card mt-4">
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar pago...</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Paciente, tratamiento o método">
+        <lucide-icon matSuffix name="search" class="search-icon"></lucide-icon>
+      </mat-form-field>
+    </div>
+
+    <table mat-table [dataSource]="dataSource" matSort class="full-width">
+
+      <!-- ID Column -->
+      <ng-container matColumnDef="id_pago">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
+        <td mat-cell *matCellDef="let pago"> {{pago.id_pago}} </td>
+      </ng-container>
+
+      <!-- Paciente Column -->
+      <ng-container matColumnDef="nombre_paciente">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Paciente </th>
+        <td mat-cell *matCellDef="let pago"> {{pago.nombre_paciente}} </td>
+      </ng-container>
+
+      <!-- Tratamiento Column -->
+      <ng-container matColumnDef="nombre_tratamiento">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Tratamiento </th>
+        <td mat-cell *matCellDef="let pago">
+          <span class="treatment-badge">{{pago.nombre_tratamiento}}</span>
+        </td>
+      </ng-container>
+
+      <!-- Monto Column -->
+      <ng-container matColumnDef="monto">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Monto </th>
+        <td mat-cell *matCellDef="let pago">
+          <span class="monto-value">{{formatMonto(pago.monto)}}</span>
+        </td>
+      </ng-container>
+
+      <!-- Método Pago Column -->
+      <ng-container matColumnDef="metodo_pago">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Método </th>
+        <td mat-cell *matCellDef="let pago">
+          <span class="metodo-badge">
+            {{getMetodoIcon(pago.metodo_pago)}} {{pago.metodo_pago}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Fecha Column -->
+      <ng-container matColumnDef="fecha_pago">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+        <td mat-cell *matCellDef="let pago"> {{formatDate(pago.fecha_pago)}} </td>
+      </ng-container>
+
+      <!-- Estado Column -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let pago">
+          <span class="estado-badge" [ngClass]="getEstadoClass(pago.estado)">
+            {{pago.estado}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let pago">
+          <div class="action-buttons">
+            <button mat-icon-button color="warn" matTooltip="Anular pago"
+                    (click)="annulPayment(pago)"
+                    [disabled]="pago.estado?.toLowerCase() === 'anulado'">
+              <lucide-icon name="x-circle" class="icon-sm"></lucide-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="8">No se encontraron pagos coincidentes con "{{dataSource.filter}}"</td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" aria-label="Seleccionar página de pagos"></mat-paginator>
+  </div>
+</div>

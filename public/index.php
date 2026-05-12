@@ -80,12 +80,19 @@ try {
     // ── Rutas públicas (sin autenticación) ────────────────────────────────
 
     if ($method === 'POST' && $path === '/api/auth/login') {
+        error_log("Login attempt: " . json_encode($body));
         $service = new AuthService();
-        $result  = $service->login(
-            $body['username'] ?? '',
-            $body['password'] ?? ''
-        );
-        respond(200, $result);
+        try {
+            $result  = $service->login(
+                $body['username'] ?? '',
+                $body['password'] ?? ''
+            );
+            error_log("Login success for: " . ($body['username'] ?? ''));
+            respond(200, $result);
+        } catch (Exception $e) {
+            error_log("Login failed for: " . ($body['username'] ?? '') . " - " . $e->getMessage());
+            throw $e;
+        }
     }
 
     if ($method === 'POST' && $path === '/api/auth/logout') {
@@ -145,13 +152,20 @@ try {
 
     if ($path === '/api/citas') {
         $auth->verificarRol([AuthService::ROL_ADMIN, AuthService::ROL_DENTISTA, AuthService::ROL_RECEPCION]);
+        require_once ROOT_PATH . '/src/dao/CitaDAO.php';
         $service = new CitaService();
 
         match ($method) {
-            'GET'  => respond(200, $service->listarPorDentista(
-                           (int) ($_GET['id_dentista'] ?? 0),
-                           $_GET['fecha'] ?? null
-                       )),
+            'GET'  => (function() use ($service) {
+                $idDentista = (int) ($_GET['id_dentista'] ?? 0);
+                if ($idDentista > 0) {
+                    respond(200, $service->listarPorDentista($idDentista, $_GET['fecha'] ?? null));
+                } else {
+                    // Admin: list all citas with join data
+                    $citaDAO = new CitaDAO();
+                    respond(200, $citaDAO->findAllRaw());
+                }
+            })(),
             'POST' => respond(201, $service->crear($body)),
             default => respond(405, ['error' => 'Método no permitido.']),
         };
@@ -178,10 +192,11 @@ try {
 
     if ($path === '/api/pagos') {
         $auth->verificarRol([AuthService::ROL_ADMIN, AuthService::ROL_RECEPCION]);
+        require_once ROOT_PATH . '/src/dao/PagoDAO.php';
         $service = new PagoService();
 
         match ($method) {
-            'GET'  => respond(200, (new PagoDAO())->findAll()),
+            'GET'  => respond(200, (new PagoDAO())->findAllRaw()),
             'POST' => respond(201, $service->registrar($body)),
             default => respond(405, ['error' => 'Método no permitido.']),
         };
@@ -263,8 +278,40 @@ try {
 
     if ($path === '/api/usuarios') {
         $auth->verificarRol([AuthService::ROL_ADMIN]);
-        require_once ROOT_PATH . '/models/UsuarioDAO.php';
-        respond(200, (new UsuarioDAO())->findAll());
+
+        if ($method === 'GET') {
+            require_once ROOT_PATH . '/models/UsuarioDAO.php';
+            respond(200, (new UsuarioDAO())->findAll());
+        }
+
+        if ($method === 'POST') {
+            require_once ROOT_PATH . '/src/service/UsuarioService.php';
+            respond(201, (new UsuarioService())->registrar($body));
+        }
+
+        respond(405, ['error' => 'Método no permitido.']);
+    }
+
+    if (preg_match('#^/api/usuarios/(\d+)$#', $path, $m)) {
+        $auth->verificarRol([AuthService::ROL_ADMIN]);
+        $id = (int) $m[1];
+
+        if ($method === 'PUT') {
+            require_once ROOT_PATH . '/src/service/UsuarioService.php';
+            respond(200, (new UsuarioService())->actualizar($id, $body));
+        }
+
+        if ($method === 'DELETE') {
+            require_once ROOT_PATH . '/models/UsuarioDAO.php';
+            $deleted = (new UsuarioDAO())->delete($id);
+            if ($deleted) {
+                respond(200, ['success' => true, 'message' => 'Usuario eliminado.']);
+            } else {
+                respond(404, ['error' => 'Usuario no encontrado.']);
+            }
+        }
+
+        respond(405, ['error' => 'Método no permitido.']);
     }
 
     if ($path === '/api/dentistas') {
@@ -279,6 +326,12 @@ try {
         // PacienteDAO->findAll devuelve un array con 'data' y 'total'
         $pacientes = (new PacienteDAO())->findAll(1000); 
         respond(200, $pacientes['data']);
+    }
+
+    if ($path === '/api/tratamientos') {
+        $auth->verificarRol([AuthService::ROL_ADMIN, AuthService::ROL_DENTISTA, AuthService::ROL_RECEPCION]);
+        require_once ROOT_PATH . '/src/dao/TratamientoDAO.php';
+        respond(200, (new TratamientoDAO())->findAll());
     }
 
     // ── 404 — ruta no encontrada ──────────────────────────────────────────

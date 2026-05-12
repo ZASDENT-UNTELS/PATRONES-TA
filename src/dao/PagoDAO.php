@@ -61,6 +61,26 @@ class PagoDAO implements DAOInterface
     }
 
     /**
+     * Devolver todos los pagos como arrays crudos (con datos de joins para el panel admin).
+     */
+    public function findAllRaw(): array
+    {
+        $stmt = $this->conn->query('
+            SELECT p.id_pago, p.id_cita, p.monto, p.metodo_pago, p.estado,
+                   p.referencia, p.fecha_pago, p.notas,
+                   u.nombre_apellido AS nombre_paciente,
+                   t.nombre          AS nombre_tratamiento
+            FROM pagos p
+            JOIN citas c      ON p.id_cita     = c.id_cita
+            JOIN pacientes pa ON c.id_paciente  = pa.id_paciente
+            JOIN usuarios u   ON pa.id_usuario  = u.id_usuario
+            JOIN tratamientos t ON c.id_tratamiento = t.id_tratamiento
+            ORDER BY p.fecha_pago DESC
+        ');
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
      * Insertar nuevo pago. Devuelve el id_pago generado.
      */
     public function save(mixed $dto): int

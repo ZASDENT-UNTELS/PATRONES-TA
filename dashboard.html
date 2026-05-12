@@ -513,24 +513,8 @@
             
             <!-- Usuarios Section -->
             <section id="usuarios" class="section">
-                <div class="table-container">
-                    <h3>Gestión de Usuarios</h3>
-                    <button class="btn-submit" onclick="openUsuarioForm()">+ Nuevo Usuario</button>
-                    <table id="usuariosTable">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Usuario</th>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Rol</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usuariosBody">
-                        </tbody>
-                    </table>
+                <div class="table-container" style="padding: 0; border: none; box-shadow: none; background: transparent;">
+                    <iframe src="usuarios.php?embed=1" style="width: 100%; height: 80vh; border: none; border-radius: 12px;"></iframe>
                 </div>
             </section>
             
@@ -658,7 +642,17 @@
                             </select>
                         </div>
                     </div>
-                    <button type="submit" class="btn-submit" disabled>Crear Usuario (Próximamente)</button>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="usuPassword">Contraseña</label>
+                            <input type="password" id="usuPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="usuPasswordConfirm">Confirmar contraseña</label>
+                            <input type="password" id="usuPasswordConfirm" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-submit">Crear Usuario</button>
                 </form>
             </div>
         </div>
@@ -1048,13 +1042,57 @@
         }
 
         function openUsuarioForm() {
+            document.getElementById('formUsuario').reset();
             document.getElementById('usuarioModal').style.display = 'block';
         }
 
-        function guardarUsuario(e) {
+        async function guardarUsuario(e) {
             e.preventDefault();
-            showMessage('Creación de usuario en desarrollo...', 'info');
-            closeModal('usuarioModal');
+
+            const nombre = document.getElementById('usuNombre').value.trim();
+            const usuario = document.getElementById('usuUsername').value.trim();
+            const email = document.getElementById('usuEmail').value.trim();
+            const rol = document.getElementById('usuRol').value;
+            const password = document.getElementById('usuPassword').value;
+            const confirmPassword = document.getElementById('usuPasswordConfirm').value;
+
+            if (!nombre || !usuario || !email || !rol || !password || !confirmPassword) {
+                showMessage('Por favor complete todos los campos obligatorios.', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showMessage('Las contraseñas no coinciden.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/usuarios`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        nombre_apellido: nombre,
+                        usuario_usuario: usuario,
+                        email,
+                        password,
+                        id_rol: Number(rol)
+                    })
+                });
+
+                const json = await response.json();
+                if (response.ok) {
+                    showMessage(json.message || 'Usuario registrado correctamente.', 'success');
+                    closeModal('usuarioModal');
+                    document.getElementById('formUsuario').reset();
+                    loadUsuarios();
+                } else {
+                    showMessage(json.error || json.message || 'Error al registrar usuario.', 'error');
+                }
+            } catch (e) {
+                console.error(e);
+                showMessage('Error de conexión al crear usuario.', 'error');
+            }
         }
         
         function editarCita(id) {

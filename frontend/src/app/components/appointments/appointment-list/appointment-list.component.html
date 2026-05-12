@@ -1,0 +1,108 @@
+<div class="appointment-list-container">
+  <div class="header-actions">
+    <div class="title-group">
+      <h1 class="medical-title">Gestión de Citas</h1>
+      <p class="text-muted">Administra las citas del consultorio</p>
+    </div>
+    <button mat-raised-button color="primary" class="medical-btn" (click)="openAppointmentForm()">
+      <lucide-icon name="calendar" class="btn-icon"></lucide-icon>
+      Nueva Cita
+    </button>
+  </div>
+
+  <div class="medical-card mt-4">
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar cita...</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Paciente, tratamiento o dentista">
+        <lucide-icon matSuffix name="search" class="search-icon"></lucide-icon>
+      </mat-form-field>
+    </div>
+
+    <table mat-table [dataSource]="dataSource" matSort class="full-width">
+
+      <!-- ID Column -->
+      <ng-container matColumnDef="id_cita">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> # </th>
+        <td mat-cell *matCellDef="let cita"> {{cita.id_cita}} </td>
+      </ng-container>
+
+      <!-- Paciente Column -->
+      <ng-container matColumnDef="nombre_paciente">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Paciente </th>
+        <td mat-cell *matCellDef="let cita"> {{cita.nombre_paciente}} </td>
+      </ng-container>
+
+      <!-- Tratamiento Column -->
+      <ng-container matColumnDef="nombre_tratamiento">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Tratamiento </th>
+        <td mat-cell *matCellDef="let cita">
+          <span class="treatment-badge">{{cita.nombre_tratamiento}}</span>
+        </td>
+      </ng-container>
+
+      <!-- Dentista Column -->
+      <ng-container matColumnDef="nombre_dentista">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Dentista </th>
+        <td mat-cell *matCellDef="let cita"> {{cita.nombre_dentista || 'Sin asignar'}} </td>
+      </ng-container>
+
+      <!-- Fecha Column -->
+      <ng-container matColumnDef="fecha_hora">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Fecha y Hora </th>
+        <td mat-cell *matCellDef="let cita"> {{formatDate(cita.fecha_hora)}} </td>
+      </ng-container>
+
+      <!-- Duración Column -->
+      <ng-container matColumnDef="duracion">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Duración </th>
+        <td mat-cell *matCellDef="let cita"> {{cita.duracion}} min </td>
+      </ng-container>
+
+      <!-- Estado Column -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let cita">
+          <span class="estado-badge" [ngClass]="getEstadoClass(cita.estado)">
+            {{cita.estado}}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let cita">
+          <div class="action-buttons">
+            <button mat-icon-button [matMenuTriggerFor]="statusMenu" matTooltip="Cambiar estado" color="primary">
+              <lucide-icon name="edit" class="icon-sm"></lucide-icon>
+            </button>
+            <mat-menu #statusMenu="matMenu">
+              <button mat-menu-item (click)="changeStatus(cita, 'Confirmada')">
+                <span>✅ Confirmar</span>
+              </button>
+              <button mat-menu-item (click)="changeStatus(cita, 'Completada')">
+                <span>✔️ Completar</span>
+              </button>
+              <button mat-menu-item (click)="changeStatus(cita, 'Cancelada')">
+                <span>❌ Cancelar</span>
+              </button>
+            </mat-menu>
+            <button mat-icon-button color="warn" matTooltip="Eliminar" (click)="deleteAppointment(cita)">
+              <lucide-icon name="trash-2" class="icon-sm"></lucide-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="8">No se encontraron citas coincidentes con "{{dataSource.filter}}"</td>
+      </tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" aria-label="Seleccionar página de citas"></mat-paginator>
+  </div>
+</div>

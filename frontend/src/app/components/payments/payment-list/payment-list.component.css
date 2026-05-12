@@ -1,0 +1,64 @@
+.payment-list-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title-group h1 { margin: 0; }
+.title-group p { margin: 4px 0 0 0; }
+
+.filter-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.search-field { width: 100%; max-width: 400px; }
+.search-icon { width: 20px; height: 20px; color: var(--text-muted); }
+
+.full-width { width: 100%; }
+
+.treatment-badge {
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.monto-value {
+  font-weight: 700;
+  color: #0f766e;
+}
+
+.metodo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.estado-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.estado-pagado { background: #d4edda; color: #155724; }
+.estado-pendiente { background: #fff3cd; color: #856404; }
+.estado-anulado { background: #f8d7da; color: #721c24; }
+
+.action-buttons { display: flex; gap: 4px; }
+.icon-sm { width: 18px; height: 18px; }
+
+.mt-4 { margin-top: 24px; }

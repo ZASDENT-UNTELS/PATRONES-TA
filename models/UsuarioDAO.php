@@ -32,21 +32,23 @@ class UsuarioDAO implements DAOInterface
 
     public function findAll(): array
     {
-        $stmt = $this->conn->query('SELECT * FROM usuarios ORDER BY nombre_apellido ASC');
+        $stmt = $this->conn->query('SELECT u.*, r.nombre AS nombre_rol
+                                     FROM usuarios u
+                                     LEFT JOIN roles r ON u.id_rol = r.id_rol
+                                     ORDER BY u.nombre_apellido ASC');
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function registrar(array $data): int
     {
-        $stmt = $this->conn->prepare('INSERT INTO usuarios (nombre_apellido, usuario_usuario, usuario_clave, email, telefono, direccion, id_rol, activo, ultimo_login)
-                                       VALUES (:nombre_apellido, :usuario_usuario, :usuario_clave, :email, :telefono, :direccion, :id_rol, :activo, NOW())');
+        $stmt = $this->conn->prepare('INSERT INTO usuarios (nombre_apellido, usuario_usuario, usuario_clave, email, telefono, id_rol, activo)
+                                       VALUES (:nombre_apellido, :usuario_usuario, :usuario_clave, :email, :telefono, :id_rol, :activo)');
         $stmt->execute([
             ':nombre_apellido' => $data['nombre_apellido'] ?? null,
             ':usuario_usuario' => $data['usuario_usuario'] ?? null,
             ':usuario_clave' => $data['usuario_clave'] ?? null,
             ':email' => $data['email'] ?? null,
             ':telefono' => $data['telefono'] ?? null,
-            ':direccion' => $data['direccion'] ?? null,
             ':id_rol' => $data['id_rol'] ?? 2,
             ':activo' => $data['activo'] ?? 1,
         ]);
@@ -72,6 +74,50 @@ class UsuarioDAO implements DAOInterface
     {
         $stmt = $this->conn->prepare('DELETE FROM usuarios WHERE id_usuario = :id');
         $stmt->execute([':id' => $id]);
+        return $stmt->rowCount() > 0;
+    }
+
+    public function update(int $id, array $data): bool
+    {
+        $fields = [];
+        $params = [':id' => $id];
+
+        if (isset($data['nombre_apellido'])) {
+            $fields[] = 'nombre_apellido = :nombre_apellido';
+            $params[':nombre_apellido'] = $data['nombre_apellido'];
+        }
+        if (isset($data['usuario_usuario'])) {
+            $fields[] = 'usuario_usuario = :usuario_usuario';
+            $params[':usuario_usuario'] = $data['usuario_usuario'];
+        }
+        if (isset($data['email'])) {
+            $fields[] = 'email = :email';
+            $params[':email'] = $data['email'];
+        }
+        if (isset($data['telefono'])) {
+            $fields[] = 'telefono = :telefono';
+            $params[':telefono'] = $data['telefono'];
+        }
+        if (isset($data['id_rol'])) {
+            $fields[] = 'id_rol = :id_rol';
+            $params[':id_rol'] = (int) $data['id_rol'];
+        }
+        if (isset($data['activo'])) {
+            $fields[] = 'activo = :activo';
+            $params[':activo'] = (int) $data['activo'];
+        }
+        if (!empty($data['usuario_clave'])) {
+            $fields[] = 'usuario_clave = :usuario_clave';
+            $params[':usuario_clave'] = $data['usuario_clave'];
+        }
+
+        if (empty($fields)) {
+            return false;
+        }
+
+        $sql = 'UPDATE usuarios SET ' . implode(', ', $fields) . ' WHERE id_usuario = :id';
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
         return $stmt->rowCount() > 0;
     }
 

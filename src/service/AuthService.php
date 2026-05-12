@@ -66,9 +66,12 @@ class AuthService
 
         return [
             'success'      => true,
-            'redirect'     => self::RUTAS_ROL[$usuario['id_rol']] ?? '/dashboard',
+            'id_usuario'   => $usuario['id_usuario'],
+            'id_rol'       => $usuario['id_rol'],
             'nombre'       => $usuario['nombre_apellido'],
             'rol'          => $usuario['nombre_rol'],
+            'username'     => $usuario['usuario_usuario'],
+            'redirect'     => self::RUTAS_ROL[$usuario['id_rol']] ?? '/dashboard',
         ];
     }
 
