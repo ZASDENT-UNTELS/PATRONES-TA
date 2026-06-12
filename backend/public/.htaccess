@@ -1,0 +1,24 @@
+# ============================================================
+# public/.htaccess — Redirige todo al Front Controller
+# ============================================================
+# Este archivo le dice a Apache que todas las peticiones
+# que NO sean archivos reales pasen por index.php
+#
+# Requiere: mod_rewrite habilitado en Apache/XAMPP
+# En XAMPP está habilitado por defecto.
+# ============================================================
+
+Options -Indexes
+
+# Proteger archivos sensibles
+<FilesMatch "^\.env|composer\.(json|lock)|zazdent\.sql$">
+    Require all denied
+</FilesMatch>
+RewriteEngine On
+
+# Si el archivo existe físicamente (imágenes, CSS, JS), servirlo directo
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Todo lo demás va al Front Controller
+RewriteRule ^(.*)$ index.php [QSA,L]

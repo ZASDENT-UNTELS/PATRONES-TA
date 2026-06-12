@@ -1,4 +1,4 @@
 <?php
-// Redirigir al usuario a la página de aterrizaje (landing) automáticamente
-header('Location: landing.html');
+// Redirigir al usuario a la página de aterrizaje (legacy) automáticamente
+header('Location: legacy/landing.html');
 exit;

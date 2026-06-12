@@ -1,0 +1,170 @@
+<div class="container-fluid p-0">
+  <!-- Loading state -->
+  <div *ngIf="loading" class="d-flex flex-column align-items-center justify-content-center py-5 mt-5">
+    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <h5 class="fw-bold text-muted">Cargando módulo de citas...</h5>
+    <p class="text-muted small">Por favor espera un momento.</p>
+  </div>
+
+  <div *ngIf="!loading">
+  <!-- Page Header -->
+  <div class="row align-items-center mb-4 g-3">
+    <div class="col">
+      <h4 class="fw-bold text-dark mb-1">Gestión de Citas</h4>
+      <p class="text-muted small mb-0">Administra las citas del consultorio</p>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-0">
+      <div class="p-4 border-bottom bg-light bg-opacity-25">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div class="d-flex flex-wrap gap-3 align-items-center w-100">
+            <div class="input-group" style="width: 250px;">
+              <span class="input-group-text bg-white border-end-0 text-muted">
+                <lucide-icon name="search" [size]="18"></lucide-icon>
+              </span>
+              <input type="text" class="form-control border-start-0 ps-0 shadow-none" 
+                     placeholder="Buscar paciente, tr..."
+                     (keyup)="applyFilter($event)">
+            </div>
+            
+            <div class="d-flex gap-2 align-items-center bg-white p-1 rounded border shadow-sm">
+              <span class="small fw-bold text-muted ps-2">Estado:</span>
+              <select class="form-select form-select-sm border-0 shadow-none bg-transparent fw-semibold text-dark" style="width: auto;" [(ngModel)]="filterEstado" (change)="applyFilterLogic()">
+                <option value="todas">Todos</option>
+                <option value="pendientes">Pendientes</option>
+                <option value="confirmadas">Confirmadas</option>
+                <option value="completadas">Completadas</option>
+                <option value="canceladas">Canceladas</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-responsive" style="overflow-x: auto;">
+        <table class="table table-hover align-middle mb-0" style="table-layout: fixed; width: 100%; min-width: 900px;">
+          <thead class="table-light">
+            <tr>
+              <th class="px-4 py-3" style="width: 60px;">#</th>
+              <th class="py-3" style="width: 15%;" *ngIf="!isPatient">Paciente</th>
+              <th class="py-3" style="width: 15%;">Doctor</th>
+              <th class="py-3" style="width: 12%;">Fecha</th>
+              <th class="py-3" style="width: 10%;">Hora</th>
+              <th class="py-3" style="width: 18%;">Tipo de consulta</th>
+              <th class="py-3 text-center" style="width: 15%;">Estado</th>
+              <th class="px-4 py-3 text-end" style="width: 140px; white-space: nowrap; min-width: 140px;" *ngIf="!isPatient">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let cita of paginatedAppointments; let i = index">
+            <tr *ngIf="cita && cita.id_cita"
+                [ngStyle]="isToday(cita.fecha_hora) ? {'background-color': '#EFF6FF', 'border-left': '3px solid #3B82F6'} : {}"
+                [ngClass]="{
+                  'opacity-75 text-secondary': cita.estado === 'Completada',
+                  'table-danger': cita.estado === 'Cancelada'
+                }">
+              <td class="px-4 text-muted small fw-bold">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+              <td class="fw-semibold text-truncate" *ngIf="!isPatient" [class.text-decoration-line-through]="cita.estado === 'Cancelada'">{{cita.nombre_paciente || '—'}}</td>
+              <td class="text-muted small text-truncate">{{cita.nombre_dentista || '—'}}</td>
+              <td class="small fw-medium">{{formatDate(cita.fecha_hora)}}</td>
+              <td class="small fw-bold text-primary">{{formatTime(cita.fecha_hora)}}</td>
+              <td>
+                <span class="badge bg-light text-dark border fw-medium px-2 py-1 text-truncate" style="max-width: 100%;">{{cita.nombre_tratamiento || '—'}}</span>
+              </td>
+              <td class="text-center">
+                <!-- Estado principal dinámico -->
+                <span *ngIf="!isPastUnattended(cita)" 
+                      class="badge rounded-pill fw-bold px-2 py-1" 
+                      [ngStyle]="{
+                        'background-color': (cita.estado === 'Pendiente' || cita.estado === 'Programada') ? '#FEF9C3' : 
+                                            (cita.estado === 'Confirmada' ? '#DBEAFE' : 
+                                            (cita.estado === 'Completada' ? '#DCFCE7' : 
+                                            (cita.estado === 'Cancelada' ? '#FEE2E2' : '#F3F4F6'))),
+                        'color': (cita.estado === 'Pendiente' || cita.estado === 'Programada') ? '#713F12' : 
+                                 (cita.estado === 'Confirmada' ? '#1E3A5F' : 
+                                 (cita.estado === 'Completada' ? '#166534' : 
+                                 (cita.estado === 'Cancelada' ? '#991B1B' : '#374151')))
+                      }" style="font-size: 0.65rem; letter-spacing: 0.05em;">
+                  {{cita.estado || '—'}}
+                </span>
+
+                <!-- Estado sobreescrito a No Asistió -->
+                <span *ngIf="isPastUnattended(cita)" 
+                      class="badge rounded-pill fw-bold px-2 py-1" 
+                      style="background-color: #FED7AA; color: #9A3412; font-size: 0.65rem; letter-spacing: 0.05em;">
+                  No asistió
+                </span>
+              </td>
+              <td class="px-4 text-end" style="white-space: nowrap; min-width: 140px;" *ngIf="!isPatient">
+                <div class="d-flex justify-content-end gap-1">
+                  <button class="btn btn-sm btn-light text-primary p-1 border shadow-sm" title="Ver detalle" (click)="openAppointmentDetail(cita)">
+                    <lucide-icon name="eye" [size]="16"></lucide-icon>
+                  </button>
+                  <button class="btn btn-sm btn-light text-success p-1 border shadow-sm" title="Completar" (click)="changeStatus(cita, 'Completada')" *ngIf="cita.estado !== 'Completada' && cita.estado !== 'Cancelada'">
+                    <lucide-icon name="check-circle" [size]="16"></lucide-icon>
+                  </button>
+                  <button class="btn btn-sm btn-light text-danger p-1 border shadow-sm" title="Cancelar" (click)="changeStatus(cita, 'Cancelada')" *ngIf="cita.estado !== 'Cancelada' && cita.estado !== 'Completada'">
+                    <lucide-icon name="x-circle" [size]="16"></lucide-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            </ng-container>
+            <tr *ngIf="filteredAppointments.length === 0">
+              <td [attr.colspan]="isPatient ? 6 : 8" style="text-align:center; padding:60px; color:#9CA3AF">
+                <div class="mb-3">
+                  <lucide-icon name="calendar-x" [size]="48" class="opacity-50"></lucide-icon>
+                </div>
+                <h6 class="fw-bold mb-1">No hay citas registradas</h6>
+                <p class="mb-0 small">No se encontraron citas con los filtros actuales.</p>
+                <button class="btn btn-primary btn-sm mt-3 shadow-sm" (click)="openAppointmentForm()" *ngIf="!isPatient">
+                  + Programar primera cita
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="p-3 border-top bg-light bg-opacity-50 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="small text-muted text-nowrap">Mostrar:</span>
+            <select class="form-select form-select-sm" style="width: auto;" (change)="changeItemsPerPage($event)">
+              <option value="10" [selected]="itemsPerPage === 10">10</option>
+              <option value="25" [selected]="itemsPerPage === 25">25</option>
+              <option value="50" [selected]="itemsPerPage === 50">50</option>
+              <option value="100" [selected]="itemsPerPage === 100">100</option>
+            </select>
+          </div>
+          <span class="small text-muted">
+            Mostrando {{paginatedAppointments.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}} - 
+            {{(currentPage - 1) * itemsPerPage + paginatedAppointments.length}} de {{filteredAppointments.length}} citas
+          </span>
+        </div>
+        <nav aria-label="Navegación de citas">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" href="javascript:void(0)" (click)="changePage(currentPage - 1)">Anterior</a>
+            </li>
+            <li class="page-item" *ngFor="let page of getPagesArray()" [class.active]="page === currentPage">
+              <a class="page-link" href="javascript:void(0)" (click)="changePage(page)">{{page}}</a>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" href="javascript:void(0)" (click)="changePage(currentPage + 1)">Siguiente</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>

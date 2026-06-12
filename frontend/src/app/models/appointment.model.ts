@@ -7,4 +7,7 @@ export interface Appointment {
   nombre_paciente: string;
   nombre_tratamiento: string;
   nombre_dentista: string | null;
+  id_pago?: number;
+  monto_pagado?: number;
+  estado_pago?: string;
 }

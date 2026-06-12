@@ -1,0 +1,146 @@
+<div class="container-fluid p-0">
+  <!-- Loading state -->
+  <div *ngIf="loading" class="d-flex flex-column align-items-center justify-content-center py-5 mt-5">
+    <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+    <h5 class="fw-bold text-muted">Cargando módulo de usuarios...</h5>
+    <p class="text-muted small">Por favor espera un momento.</p>
+  </div>
+
+  <div *ngIf="!loading">
+  <!-- Page Header -->
+  <div class="row align-items-center mb-4 g-3">
+    <div class="col">
+      <h4 class="fw-bold text-dark mb-1">Gestión de Usuarios</h4>
+      <p class="text-muted small mb-0">Administra los accesos y roles del sistema</p>
+    </div>
+    <div class="col-auto">
+      <button class="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" (click)="openUserForm()">
+        <lucide-icon name="user-plus" [size]="18"></lucide-icon>
+        <span>Nuevo Usuario</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="card-body p-0">
+      <!-- Search and Filters Header -->
+      <div class="p-4 border-bottom">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div class="d-flex flex-wrap gap-3 align-items-center">
+            <div class="input-group" style="width: 280px;">
+              <span class="input-group-text bg-white border-end-0 text-muted">
+                <lucide-icon name="search" [size]="18"></lucide-icon>
+              </span>
+              <input type="text" class="form-control border-start-0 ps-0 shadow-none" 
+                     placeholder="Buscar por nombre, email o usuario..."
+                     (keyup)="applyFilter($event)">
+            </div>
+            <div class="btn-group shadow-sm">
+              <button class="btn btn-outline-secondary btn-sm" [class.active]="currentFilterRole === 'todos'" (click)="setFilterRole('todos')">Todos</button>
+              <button class="btn btn-outline-secondary btn-sm" [class.active]="currentFilterRole === 'administrador'" (click)="setFilterRole('administrador')">Administrador</button>
+              <button class="btn btn-outline-secondary btn-sm" [class.active]="currentFilterRole === 'dentista'" (click)="setFilterRole('dentista')">Dentista</button>
+              <button class="btn btn-outline-secondary btn-sm" [class.active]="currentFilterRole === 'recepcionista'" (click)="setFilterRole('recepcionista')">Recepcionista</button>
+              <button class="btn btn-outline-secondary btn-sm" [class.active]="currentFilterRole === 'paciente'" (click)="setFilterRole('paciente')">Paciente</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="px-4 py-3" style="width: 60px;">#</th>
+              <th class="py-3">Usuario</th>
+              <th class="py-3">Nombre Completo</th>
+              <th class="py-3">Email</th>
+              <th class="py-3">Rol</th>
+              <th class="py-3 text-center">Estado</th>
+              <th class="px-4 py-3 text-end">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of paginatedUsers; let i = index">
+              <td class="px-4 text-muted small fw-bold">{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+              <td>
+                <span class="badge bg-light text-primary border fw-semibold">{{user.usuario_usuario}}</span>
+              </td>
+              <td>
+                <div class="fw-semibold text-dark">{{user.nombre_apellido}}</div>
+              </td>
+              <td class="text-muted small">{{user.email}}</td>
+              <td>
+                <span class="badge rounded-pill fw-medium" [ngClass]="{
+                  'bg-success-subtle text-success': user.nombre_rol === 'Administrador',
+                  'bg-info-subtle text-info': user.nombre_rol === 'Recepcionista',
+                  'bg-primary-subtle text-primary': user.nombre_rol === 'Dentista',
+                  'bg-secondary-subtle text-secondary': user.nombre_rol === 'Paciente'
+                }">
+                  {{user.nombre_rol}}
+                </span>
+              </td>
+              <td class="text-center">
+                <span class="badge rounded-pill" [class.bg-success]="user.activo" [class.bg-danger]="!user.activo" style="width: 8px; height: 8px; padding: 0; display: inline-block;" title="{{user.activo ? 'Activo' : 'Inactivo'}}"></span>
+                <span class="ms-2 small fw-medium" [class.text-success]="user.activo" [class.text-danger]="!user.activo">
+                  {{user.activo ? 'Activo' : 'Inactivo'}}
+                </span>
+              </td>
+              <td class="px-4 text-end">
+                <div class="d-flex justify-content-end gap-1">
+                  <button class="btn btn-sm btn-light text-primary p-1 border shadow-sm" title="Editar" (click)="openUserForm(user)">
+                    <lucide-icon name="edit" [size]="16"></lucide-icon>
+                  </button>
+                  <button class="btn btn-sm btn-light text-danger p-1 border shadow-sm" title="Eliminar" (click)="deleteUser(user)">
+                    <lucide-icon name="trash-2" [size]="16"></lucide-icon>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredUsers.length === 0">
+              <td colspan="7" class="text-center py-5 text-muted">
+                <div class="mb-2"><lucide-icon name="search-x" [size]="48" class="opacity-25"></lucide-icon></div>
+                <p class="mb-0">No se encontraron usuarios coincidentes.</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination (Simple Bootstrap) -->
+      <div class="p-3 border-top bg-light bg-opacity-50 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="small text-muted text-nowrap">Mostrar:</span>
+            <select class="form-select form-select-sm" style="width: auto;" (change)="changeItemsPerPage($event)">
+              <option value="10" [selected]="itemsPerPage === 10">10</option>
+              <option value="25" [selected]="itemsPerPage === 25">25</option>
+              <option value="50" [selected]="itemsPerPage === 50">50</option>
+              <option value="100" [selected]="itemsPerPage === 100">100</option>
+            </select>
+          </div>
+          <span class="small text-muted">
+            Mostrando {{paginatedUsers.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}} - 
+            {{(currentPage - 1) * itemsPerPage + paginatedUsers.length}} de {{filteredUsers.length}} registros
+          </span>
+        </div>
+        <nav aria-label="Navegación de usuarios">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a class="page-link" href="javascript:void(0)" (click)="changePage(currentPage - 1)">Anterior</a>
+            </li>
+            <li class="page-item" *ngFor="let page of getPagesArray()" [class.active]="page === currentPage">
+              <a class="page-link" href="javascript:void(0)" (click)="changePage(page)">{{page}}</a>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a class="page-link" href="javascript:void(0)" (click)="changePage(currentPage + 1)">Siguiente</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

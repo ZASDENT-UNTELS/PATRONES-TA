@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -7,8 +8,7 @@ import { Appointment } from '../models/appointment.model';
   providedIn: 'root'
 })
 export class AppointmentService {
-  private readonly API_URL = '/PATRONES-TA/public/api/citas';
-  private readonly BASE_URL = '/PATRONES-TA/public/api';
+  private readonly API_URL = `${environment.apiUrl}/appointments`;
 
   constructor(private http: HttpClient) {}
 
@@ -21,7 +21,7 @@ export class AppointmentService {
   }
 
   updateStatus(id: number, estado: string): Observable<any> {
-    return this.http.put(`${this.API_URL}/${id}`, { estado }, { withCredentials: true });
+    return this.http.put(`${this.API_URL}/${id}/status`, { estado }, { withCredentials: true });
   }
 
   deleteAppointment(id: number): Observable<any> {
@@ -29,15 +29,19 @@ export class AppointmentService {
   }
 
   // Helper endpoints for form dropdowns
+  getCatalogos(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/catalogos`, { withCredentials: true });
+  }
+
   getPacientes(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.BASE_URL}/pacientes`, { withCredentials: true });
+    return this.http.get<any[]>(`${environment.apiUrl}/pacientes`, { withCredentials: true });
   }
 
   getDentistas(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.BASE_URL}/dentistas`, { withCredentials: true });
+    return this.http.get<any[]>(`${environment.apiUrl}/dentistas`, { withCredentials: true });
   }
 
   getTratamientos(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.BASE_URL}/tratamientos`, { withCredentials: true });
+    return this.http.get<any[]>(`${environment.apiUrl}/tratamientos`, { withCredentials: true });
   }
 }

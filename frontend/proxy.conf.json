@@ -1,6 +1,6 @@
 {
-  "/PATRONES-TA/public/api": {
-    "target": "http://localhost",
+  "/PATRONES-TA/backend/public/api": {
+    "target": "http://127.0.0.1",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
