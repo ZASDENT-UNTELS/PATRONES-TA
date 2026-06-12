@@ -334,7 +334,6 @@ export class PaymentListComponent implements OnInit {
       text: `Vas a anular el pago #${pago.id_pago} de S/. ${pago.monto}`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#dc3545',
       confirmButtonText: 'Sí, anular',
       cancelButtonText: 'Cancelar',
       customClass: {
@@ -350,7 +349,10 @@ export class PaymentListComponent implements OnInit {
               title: 'Anulado',
               text: 'El pago ha sido anulado correctamente',
               icon: 'success',
-              confirmButtonColor: '#0f4c81'
+              customClass: {
+                confirmButton: 'btn btn-primary px-4'
+              },
+              buttonsStyling: false
             });
             this.loadPayments();
           },

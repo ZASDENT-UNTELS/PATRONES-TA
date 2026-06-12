@@ -126,6 +126,9 @@
               </td>
               <td class="px-4 text-end" style="white-space: nowrap; min-width: 140px;" *ngIf="!isPatient">
                 <div class="d-flex justify-content-end gap-1">
+                  <button class="btn btn-sm btn-light text-warning p-1 border shadow-sm" title="Registrar Abono/Pago" (click)="openPaymentForAppointment(cita)" *ngIf="cita.estado !== 'Cancelada'">
+                    <lucide-icon name="banknote" [size]="16"></lucide-icon>
+                  </button>
                   <button class="btn btn-sm btn-light text-primary p-1 border shadow-sm" title="Ver detalle" (click)="openAppointmentDetail(cita)">
                     <lucide-icon name="eye" [size]="16"></lucide-icon>
                   </button>

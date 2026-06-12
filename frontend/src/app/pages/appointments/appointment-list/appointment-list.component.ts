@@ -354,7 +354,6 @@ export class AppointmentListComponent implements OnInit {
         html: `Aún hay un saldo pendiente de <b>S/. ${saldo.toFixed(2)}</b>.<br><br>¿Deseas registrar el cobro automáticamente y completar la cita?`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: '#0f4c81',
         confirmButtonText: 'Aceptar',
         cancelButtonText: 'Cancelar',
         customClass: {
@@ -380,7 +379,6 @@ export class AppointmentListComponent implements OnInit {
       html: `Cambiar cita #${cita.id_cita} a "<b>${nuevoEstado}</b>"${extraWarning}`,
       icon: 'question',
       showCancelButton: true,
-      confirmButtonColor: '#0f4c81',
       confirmButtonText: 'Sí, cambiar',
       cancelButtonText: 'Cancelar',
       customClass: {
@@ -402,7 +400,10 @@ export class AppointmentListComponent implements OnInit {
           title: 'Actualizado',
           text: `Estado cambiado a "${nuevoEstado}"`,
           icon: 'success',
-          confirmButtonColor: '#0f4c81'
+          customClass: {
+            confirmButton: 'btn btn-primary px-4'
+          },
+          buttonsStyling: false
         });
         this.loadAppointments();
       },
@@ -430,7 +431,10 @@ export class AppointmentListComponent implements OnInit {
               title: 'Cobrado y Completado',
               text: `Se registró el pago automático de S/. ${monto.toFixed(2)} y se completó la cita.`,
               icon: 'success',
-              confirmButtonColor: '#0f4c81'
+              customClass: {
+                confirmButton: 'btn btn-primary px-4'
+              },
+              buttonsStyling: false
             });
             this.loadAppointments();
           },
@@ -452,7 +456,6 @@ export class AppointmentListComponent implements OnInit {
       text: `Vas a eliminar la cita #${cita.id_cita} de ${cita.nombre_paciente}`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#dc3545',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
       customClass: {
@@ -468,7 +471,10 @@ export class AppointmentListComponent implements OnInit {
               title: 'Eliminada',
               text: 'La cita ha sido eliminada',
               icon: 'success',
-              confirmButtonColor: '#0f4c81'
+              customClass: {
+                confirmButton: 'btn btn-primary px-4'
+              },
+              buttonsStyling: false
             });
             this.loadAppointments();
           },

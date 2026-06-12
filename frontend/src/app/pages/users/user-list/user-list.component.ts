@@ -129,8 +129,6 @@ export class UserListComponent implements OnInit {
       text: `Vas a eliminar al usuario ${user.nombre_apellido}`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#0f4c81',
-      cancelButtonColor: '#dc3545',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
       customClass: {
@@ -146,7 +144,10 @@ export class UserListComponent implements OnInit {
               title: 'Eliminado',
               text: 'El usuario ha sido eliminado correctamente',
               icon: 'success',
-              confirmButtonColor: '#0f4c81'
+              customClass: {
+                confirmButton: 'btn btn-primary px-4'
+              },
+              buttonsStyling: false
             });
             this.loadUsers();
           },
