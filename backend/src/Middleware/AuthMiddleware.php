@@ -13,7 +13,7 @@ class AuthMiddleware
      */
     public static function requireAuth(): void
     {
-        $authService = new AuthService();
+        $authService = AuthService::getInstance();
         if (!$authService->estaAutenticado()) {
             throw new RuntimeException('No autenticado.', 401);
         }
@@ -28,7 +28,7 @@ class AuthMiddleware
         // requireRole implícitamente requiere autenticación
         self::requireAuth();
 
-        $authService = new AuthService();
+        $authService = AuthService::getInstance();
         $authService->verificarRol($rolesPermitidos);
     }
     
@@ -37,7 +37,7 @@ class AuthMiddleware
      */
     public static function getUserId(): ?int
     {
-        $authService = new AuthService();
+        $authService = AuthService::getInstance();
         if ($authService->estaAutenticado()) {
             $user = $authService->usuarioActual();
             return $user['id_usuario'] ?? null;
@@ -50,7 +50,7 @@ class AuthMiddleware
      */
     public static function getUserRole(): ?int
     {
-        $authService = new AuthService();
+        $authService = AuthService::getInstance();
         if ($authService->estaAutenticado()) {
             $user = $authService->usuarioActual();
             return $user['id_rol'] ?? null;

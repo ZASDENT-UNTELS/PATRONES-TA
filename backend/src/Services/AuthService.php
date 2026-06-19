@@ -14,7 +14,8 @@ use RuntimeException;
  */
 class AuthService
 {
-    private UsuarioDAO $usuarioDAO;
+    private static ?AuthService $instance = null;
+    private ?UsuarioDAO $usuarioDAO = null;
 
     // Roles del sistema
     public const ROL_ADMIN      = 1;
@@ -30,9 +31,32 @@ class AuthService
         self::ROL_PACIENTE  => '/app/my-appointments',
     ];
 
-    public function __construct()
+    private function __construct()
     {
-        $this->usuarioDAO = new UsuarioDAO();
+        // Dejar vacío para permitir carga perezosa y pruebas sin conexión activa a la BD
+    }
+
+    private function getUsuarioDAO(): UsuarioDAO
+    {
+        if ($this->usuarioDAO === null) {
+            $this->usuarioDAO = new UsuarioDAO();
+        }
+        return $this->usuarioDAO;
+    }
+
+    public static function getInstance(): self
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+
+    private function __clone() {}
+
+    public function __wakeup(): void
+    {
+        throw new RuntimeException('No se puede deserializar un Singleton.');
     }
 
     /**
@@ -44,14 +68,14 @@ class AuthService
             throw new InvalidArgumentException('Usuario y contraseña son requeridos.', 400);
         }
 
-        $usuario = $this->usuarioDAO->findByUsernameOrEmail($username);
+        $usuario = $this->getUsuarioDAO()->findByUsernameOrEmail($username);
 
         if (!$usuario || !password_verify($password, $usuario['usuario_clave'])) {
             throw new RuntimeException('Credenciales incorrectas.', 401);
         }
 
         // Actualizar último login
-        $this->usuarioDAO->updateUltimoLogin($usuario['id_usuario']);
+        $this->getUsuarioDAO()->updateUltimoLogin($usuario['id_usuario']);
 
         // Crear sesión
         if (session_status() === PHP_SESSION_NONE) {
