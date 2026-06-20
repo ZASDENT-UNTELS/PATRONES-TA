@@ -10,7 +10,7 @@ class AuthController
 
     public function __construct()
     {
-        $this->authService = new AuthService();
+        $this->authService = AuthService::getInstance();
     }
 
     public function login(array $data): array

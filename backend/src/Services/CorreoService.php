@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Views\TemplateView;
 use Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -49,13 +50,17 @@ class CorreoService
 
             $this->mail->Subject = 'Confirmación de solicitud de cita - ZAZDENT';
             
-            $cuerpoHTML = "<h2>Nueva solicitud de cita</h2>
-                <p>Hola <strong>" . htmlspecialchars($nombrePaciente) . "</strong>,</p>
-                <p>Hemos recibido tu solicitud de cita para el tratamiento de <strong>" . htmlspecialchars($datosCita['tratamiento'] ?? 'Odontología General') . "</strong>.</p>
-                <p><strong>Fecha solicitada:</strong> " . htmlspecialchars($datosCita['fecha_hora']) . "</p>
-                <p>Nos pondremos en contacto contigo pronto para confirmar.</p>
-                <br>
-                <p>Saludos cordiales,<br>El equipo de ZAZDENT</p>";
+            // Usar patrón Template View para separar el diseño HTML del correo
+            $templatePath = dirname(__DIR__) . '/Views/emails/confirmacion_cita.php';
+            $layoutPath = dirname(__DIR__) . '/Views/layouts/mail_layout.php';
+
+            $view = new TemplateView($templatePath, [
+                'nombrePaciente' => $nombrePaciente,
+                'datosCita'      => $datosCita,
+                'titulo'         => 'Nueva solicitud de cita'
+            ]);
+            $view->setLayout($layoutPath);
+            $cuerpoHTML = $view->render();
             
             $this->mail->isHTML(true);
             $this->mail->Body = $cuerpoHTML;
