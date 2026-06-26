@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Proxy /public/api calls to the new backend location
+    # This maintains compatibility with the existing frontend proxy
+    RewriteRule ^public/api/(.*)$ backend/public/index.php [QSA,L]
+    RewriteRule ^backend/public/(.*)$ backend/public/index.php [QSA,L]
+    
+    # Permitir archivos y directorios reales
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Redirigir todo a index.php (que redirige a landing.html)
+    RewriteRule ^(.*)$ index.php [QSA,L]
+</IfModule>

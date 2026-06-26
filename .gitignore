@@ -1,0 +1,33 @@
+# ============================================================
+# .gitignore — Archivos que Git debe ignorar para PHP
+# ============================================================
+
+# 1. Variables de Entorno (¡NUNCA SUBIR CONTRASEÑAS A GITHUB!)
+.env
+.env.local
+.env.*.local
+
+# 2. Dependencias de Composer
+/vendor/
+
+# 3. Backups de Base de Datos y Logs
+*.sql
+*.sqlite
+*.log
+*.bak
+database_backups/
+
+# 4. Archivos de Sistema Operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 5. Configuraciones de Editores/IDEs
+.vscode/
+.idea/
+*.suo
+*.user
+
+# 6. Caché y temporales
+/tmp/
+/cache/
