@@ -14,13 +14,29 @@ use Exception;
  */
 class CitaController
 {
-    private CitaService $citaService;
-    private CitaDAO $citaDAO;
+    private ?CitaService $citaService = null;
+    private ?CitaDAO $citaDAO = null;
 
     public function __construct()
     {
-        $this->citaService = new CitaService();
-        $this->citaDAO = new CitaDAO();
+    }
+
+    private function getCitaService(): CitaService
+    {
+        if ($this->citaService === null) {
+            $this->citaService = new CitaService();
+        }
+
+        return $this->citaService;
+    }
+
+    private function getCitaDAO(): CitaDAO
+    {
+        if ($this->citaDAO === null) {
+            $this->citaDAO = new CitaDAO();
+        }
+
+        return $this->citaDAO;
     }
 
     /**
@@ -35,7 +51,7 @@ class CitaController
             $pacienteDAO = new \App\Repositories\PacienteDAO();
             $paciente = $pacienteDAO->findByIdUsuario($userId);
             if ($paciente) {
-                return array_map(fn($cita) => $cita->toArray(), $this->citaDAO->findByPaciente($paciente->id));
+                return array_map(fn($cita) => $cita->toArray(), $this->getCitaDAO()->findByPaciente($paciente->id));
             }
             return []; // Si no tiene perfil de paciente aún
         }
@@ -44,13 +60,13 @@ class CitaController
             $dentistaDAO = new \App\Repositories\DentistaDAO();
             $dentista = $dentistaDAO->findByIdUsuario($userId);
             if ($dentista) {
-                return array_map(fn($cita) => $cita->toArray(), $this->citaDAO->findByDentista($dentista['id_dentista']));
+                return array_map(fn($cita) => $cita->toArray(), $this->getCitaDAO()->findByDentista($dentista['id_dentista']));
             }
             return [];
         }
 
         // ADMIN (1) o RECEPCION (3) ven todo
-        return $this->citaDAO->findAllRaw();
+        return $this->getCitaDAO()->findAllRaw();
     }
 
     /**
@@ -58,7 +74,7 @@ class CitaController
      */
     public function registrar(array $datos): array
     {
-        return $this->citaService->crear($datos);
+        return $this->getCitaService()->crear($datos);
     }
 
     /**
@@ -66,7 +82,7 @@ class CitaController
      */
     public function cambiarEstado(int $id, string $estado): array
     {
-        return $this->citaService->cambiarEstado($id, $estado);
+        return $this->getCitaService()->cambiarEstado($id, $estado);
     }
 
     /**
@@ -74,7 +90,7 @@ class CitaController
      */
     public function eliminar(int $id): array
     {
-        return $this->citaService->eliminar($id);
+        return $this->getCitaService()->eliminar($id);
     }
 
     /**

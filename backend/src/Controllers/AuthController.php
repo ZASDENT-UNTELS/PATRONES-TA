@@ -6,11 +6,19 @@ use App\Services\AuthService;
 
 class AuthController
 {
-    private AuthService $authService;
+    private ?AuthService $authService = null;
 
     public function __construct()
     {
-        $this->authService = AuthService::getInstance();
+    }
+
+    private function getAuthService(): AuthService
+    {
+        if ($this->authService === null) {
+            $this->authService = AuthService::getInstance();
+        }
+
+        return $this->authService;
     }
 
     public function login(array $data): array
@@ -19,7 +27,7 @@ class AuthController
             throw new \InvalidArgumentException('Usuario y contraseña requeridos', 400);
         }
 
-        $result = $this->authService->login($data['username'], $data['password']);
+        $result = $this->getAuthService()->login($data['username'], $data['password']);
 
         if (!$result) {
             throw new \RuntimeException('Credenciales inválidas', 401);
@@ -30,7 +38,7 @@ class AuthController
 
     public function me(): array
     {
-        $user = $this->authService->usuarioActual();
+        $user = $this->getAuthService()->usuarioActual();
         if (!$user) {
             throw new \RuntimeException('No autorizado', 401);
         }
@@ -39,7 +47,7 @@ class AuthController
 
     public function logout(): array
     {
-        $this->authService->logout();
+        $this->getAuthService()->logout();
         return ['message' => 'Sesión cerrada'];
     }
 }
